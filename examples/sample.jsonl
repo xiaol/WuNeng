@@ -1,0 +1,1 @@
+{"messages":[{"role":"system","content":"Answer clearly and briefly."},{"role":"user","content":"What is a recurrent state?"},{"role":"assistant","content":"A recurrent state is the model's carried memory summarizing earlier sequence elements."}]}
