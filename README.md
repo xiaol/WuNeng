@@ -22,6 +22,24 @@ Each Qwen3.5-9B GDN layer receives one state with shape `32 x 128 x 128`. Across
 
 See [docs/PLE.md](docs/PLE.md) for the PLE equations, placement, open reference implementations, and memory requirements. The matched native-post versus retrofit-pre experiment is recorded in [docs/PLE_NORM_DIAGNOSTIC.md](docs/PLE_NORM_DIAGNOSTIC.md).
 
+## Scene-boundary benchmark
+
+The main pilot uses Qwen3.5-9B with all base-model parameters frozen. Adapters are trained on the 1,804-row Novel Agent scene-boundary training split. Response loss and greedy-generation metrics below use all 149 held-out test scenes; higher exact match and Boundary F1 are better, while lower loss and perplexity are better.
+
+| Model | Parameters optimized in stage | Response loss ↓ | Perplexity ↓ | Exact match ↑ | Boundary F1 ↑ | Valid JSON |
+|---|---:|---:|---:|---:|---:|---:|
+| Frozen Qwen3.5-9B (about 9B parameters, all frozen) | 0 | 1.21704 | 3.37718 | 0.00% | 0.00000 | 0% |
+| State-only, `1e-4` | 12,582,912 | 0.22401 | 1.25108 | 34.23% | 0.33117 | 100% |
+| Pre-norm BF16 PLE-only | 2,134,909,184 | 0.21197 | 1.23611 | 36.24% | 0.32857 | 100% |
+| PLE → state, `1e-4` | 12,582,912; PLE frozen | 0.21088 | 1.23477 | **40.94%** | **0.36232** | 100% |
+| PLE → state, `3e-4` | 12,582,912; PLE frozen | **0.20885** | **1.23225** | 38.26% | 0.35336 | 100% |
+| PLE → state, `1e-3` | 12,582,912; PLE frozen | 0.22273 | 1.24948 | 34.90% | 0.30435 | 100% |
+| PLE → state, `3e-3` | 12,582,912; PLE frozen | 0.21806 | 1.24367 | 37.58% | 0.30657 | 100% |
+
+Sequential state tuning does improve the PLE-only adapter on the complete test set: the `1e-4` stage raises exact match from 36.24% to 40.94% and Boundary F1 from 0.32857 to 0.36232. Increasing the state learning rate further is not consistently beneficial. The earlier 20-row generation screen was noisy—its 50% exact-match figures should not be treated as the full benchmark.
+
+See [docs/BENCHMARK.md](docs/BENCHMARK.md) for the original post-norm runs, the PLE norm correction, learning-rate sweep, protocol, and artifact paths.
+
 ## Install
 
 Use an environment with a Qwen3.5-capable Transformers release:
