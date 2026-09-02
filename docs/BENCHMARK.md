@@ -46,21 +46,22 @@ Additional artifacts:
 
 To test whether the sequential stage was simply under-updated, the frozen pre-norm BF16 PLE adapter was followed by fresh state tuning at peak learning rates `1e-4`, `3e-4`, `1e-3`, and `3e-3`. All four runs use the same 113-update cosine schedule. This table scores greedy generation on **all 149** held-out scenes (not the smaller 20-row screen above).
 
-| Sequential state LR | Response loss ↓ | Perplexity ↓ | Exact match ↑ | Boundary F1 ↑ | Valid JSON |
-|---:|---:|---:|---:|---:|---:|
+| Model / sequential state LR | Response loss ↓ | Perplexity ↓ | Exact match ↑ | Boundary F1 ↑ | Valid JSON |
+|---|---:|---:|---:|---:|---:|
+| Frozen base — Qwen3.5-9B (all frozen) | 1.21704 | 3.37718 | 0.00% | 0.00000 | 0% |
+| State-only, `1e-4` | 0.22401 | 1.25108 | 34.23% | 0.33117 | 100% |
 | PLE-only baseline (no state stage) | 0.21197 | 1.23611 | 36.24% | 0.32857 | 100% |
-| `1e-4` | 0.21088 | 1.23477 | **40.94%** | **0.36232** | 100% |
-| `3e-4` | **0.20885** | **1.23225** | 38.26% | 0.35336 | 100% |
-| `1e-3` | 0.22273 | 1.24948 | 34.23% | 0.33333 | 100% |
-| `3e-3` | 0.21806 | 1.24367 | 37.58% | 0.30657 | 100% |
+| PLE → state, `1e-4` | 0.21088 | 1.23477 | **40.94%** | **0.36232** | 100% |
+| PLE → state, `3e-4` | **0.20885** | **1.23225** | 38.26% | 0.35336 | 100% |
+| PLE → state, `1e-3` | 0.22273 | 1.24948 | 34.90% | 0.30435 | 100% |
+| PLE → state, `3e-3` | 0.21806 | 1.24367 | 37.58% | 0.30657 | 100% |
 
-The higher-LR experiment does not support simply increasing the learning rate: `1e-4` gives the best full-test Boundary F1, while `3e-4` gives the lowest loss. The `1e-3` and `3e-3` runs are worse on the held-out scene metric. The earlier 20-row screen favored `3e-4`/`3e-3`, demonstrating why model selection should use the complete 149-row generation benchmark.
-
-For context, the existing state-only adapter scores response loss `0.22401`, exact match `34.23%`, and Boundary F1 `0.33117` on all 149 scenes under this same evaluation protocol; its earlier 20-row screen was substantially more optimistic.
+The higher-LR experiment does not support simply increasing the learning rate: `1e-4` gives the best full-test Boundary F1, while `3e-4` gives the lowest loss. The `1e-3` and `3e-3` runs are worse on the held-out scene metric. The earlier 20-row screen favored `3e-4`/`3e-3`, demonstrating why model selection should use the complete 149-row generation benchmark. State-only's earlier 20-row score was similarly optimistic.
 
 Sweep artifacts:
 
 - `outputs/benchmarks/state-scene-e1-all149.json`
+- `outputs/benchmarks/base-scene-e1-all149.json`
 - `outputs/benchmarks/ple256-bf16-pre-scene-e1-all149.json`
 - `outputs/benchmarks/ple256-bf16-pre-then-state-lr1e-4-scene-e1-all149.json`
 - `outputs/benchmarks/ple256-bf16-pre-then-state-lr3e-4-scene-e1-all149.json`
